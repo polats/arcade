@@ -1,0 +1,33 @@
+{
+  "name": "Arcade",
+  "description": "Software stack for creating arcade and tournament sessions on-chain",
+  "repository": "https://github.com/polats/arcade",
+  "success_url": "/",
+  "addons": [
+  ],
+  "env": {
+    "SESSION_SECRET": {
+      "description": "A long random key for securing user sessions, replace with your own.",
+      "value": "ReplaceMeWithYourOwnRandomKeyPleaseOKR3fr1g3r4t0r"
+    },
+    "URL": {
+      "description": "The heroku app URL. Replace YOURAPPNAME with your 'App Name' defined above",
+      "value": "https://YOURAPPNAME.herokuapp.com"
+    },
+    "FACEBOOK_CLIENT_ID": {
+      "description": "Leave blank if not used.",
+      "value": "",
+      "required": false
+    },
+    "GOOGLE_CLIENT_ID": {
+      "description": "Leave blank if not used.",
+      "value": "",
+      "required": false
+    },
+    "TWITTER_CLIENT_ID": {
+      "description": "Leave blank if not used.",
+      "value": "",
+      "required": false
+    }
+  }
+}
