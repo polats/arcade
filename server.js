@@ -8,6 +8,16 @@ const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
+// API calls
+
+app.get('/hello', (req, res) => {
+
+  res.send({ msg: "Hello from API!" });
+});
+
+
+
 // Serve any static files
 app.use(express.static(path.join(__dirname, 'client/build')));
 
