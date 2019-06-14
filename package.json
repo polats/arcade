@@ -17,7 +17,7 @@
     "server": "nodemon server.js",
     "react:build": "cd client && npm run build",
     "dev": "concurrently --kill-others-on-fail \"npm run client\" \"npm run server\"",
-    "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run react:build",
+    "heroku-postbuild": "cd client && npm install",
     "start": "node server.js"
   },
   "dependencies": {
