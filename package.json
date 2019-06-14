@@ -1,6 +1,6 @@
 {
   "name": "arcade",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "description": "Software stack for creating arcade and tournament sessions on-chain",
   "main": "./lib/index.js",
   "scripts": {
