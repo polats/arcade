@@ -1,3 +1,4 @@
+import { Component } from 'react';
 export * from './packageclass';
 
 export default class ComponentSuperClass extends Component {
