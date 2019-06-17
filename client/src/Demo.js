@@ -1,10 +1,10 @@
 import React from 'react';
-import ComponentSuperClass, {PackageClass} from './package';
+import Arcade, {ArcadeContractLoader} from './package';
 import { Metamask, Gas, ContractLoader, Transactions, Events, Scaler, Blockie, Address, Button } from "dapparatus"
 import axios from 'axios';
 import Web3 from 'web3';
 
-class Demo extends ComponentSuperClass {
+class Demo extends Arcade {
   constructor(props) {
     super(props);
 
@@ -56,6 +56,9 @@ class Demo extends ComponentSuperClass {
              this.setState(state)
            }
           }}
+        />
+        <ArcadeContractLoader
+          contracts={require(`${__dirname}/contracts`)}
         />
         {connectedDisplay}
       </div>

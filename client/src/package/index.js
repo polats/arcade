@@ -1,7 +1,7 @@
 import { Component } from 'react';
-export * from './packageclass';
+export * from './arcadecontractloader';
 
-export default class ComponentSuperClass extends Component {
+export default class Arcade extends Component {
 
     constructor(props) {
       super(props);
