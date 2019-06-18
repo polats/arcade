@@ -42,13 +42,21 @@ class Demo extends Arcade {
          }}
        />
       )
+
+      connectedDisplay.push(
+        <ArcadeContractLoader
+          config={{DEBUG:true, hide:false}}
+          web3={web3}
+          contracts={require(`${__dirname}/contracts`)}
+        />
+      )
     }
 
     return (
       <div>
       <div className="App">
         <Metamask
-          config={{requiredNetwork:['Unknown','Rinkeby']}}
+          config={{requiredNetwork:['Unknown','Rinkeby', 'Ropsten', 'Mainnet']}}
           onUpdate={(state)=>{
            console.log("metamask state update:",state)
            if(state.web3Provider) {
@@ -56,9 +64,6 @@ class Demo extends Arcade {
              this.setState(state)
            }
           }}
-        />
-        <ArcadeContractLoader
-          contracts={require(`${__dirname}/contracts`)}
         />
         {connectedDisplay}
       </div>
