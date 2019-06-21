@@ -90,7 +90,7 @@ export class ArcadeContractLoader extends React.Component {
               </div>
             )
           }
-        }else{
+        }else {
           contractDisplay = "Loading..."
         }
         return (
