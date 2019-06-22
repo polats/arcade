@@ -21,7 +21,7 @@
     "heroku-postbuild": "cd client && npm install",
     "start": "node server.js",
     "truffle:compile": "truffle compile",
-    "truffle:deploy": "truffle deploy",
+    "truffle:deploy": "truffle deploy && yarn contracts:copy",
     "truffle:test": "truffle test",
     "contracts:copy": "cp -a ./build/contracts/. ./client/src/contracts/ && create-index ./client/src/contracts -x json"
   },
@@ -91,6 +91,7 @@
     "nyc": "^13.3.0",
     "openzeppelin-solidity": "^2.2.0",
     "react-test-renderer": "^16.8.6",
+    "remix-lib": "^0.4.6",
     "rimraf": "^2.6.2",
     "truffle": "^5.0.24",
     "truffle-assertions": "^0.9.1",

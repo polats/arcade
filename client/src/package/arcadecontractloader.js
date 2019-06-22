@@ -1,10 +1,14 @@
 import * as React from 'react';
 import deepmerge from 'deepmerge';
+import remixLib from 'remix-lib';
 
 let defaultConfig = {
   DEBUG: true,
   hide: true
 }
+
+var txHelper = remixLib.execution.txHelper
+
 
 export class ArcadeContractLoader extends React.Component {
 
@@ -29,6 +33,12 @@ export class ArcadeContractLoader extends React.Component {
         return (contractNetworks[networkId].address)
     }
 
+    getInputs (funABI) {
+      if (!funABI.inputs) {
+        return ''
+      }
+      return txHelper.inputParametersDeclarationToString(funABI.inputs)
+    }
 
 
     async loadContract(contractObject) {
@@ -77,18 +87,41 @@ export class ArcadeContractLoader extends React.Component {
 
     }
 
+    createUIfromABI(abi) {
+      return (
+        <div key={"abi"+abi.name} style={{margin:5,padding:5}}>
+        <button>{abi.name}</button>
+        <input title={this.getInputs(abi)} placeholder={this.getInputs(abi)}>
+
+        </input>
+        </div>
+      )
+    }
+
     render(){
+
       if(this.state.config.hide){
         return false
       } else {
         let contractDisplay = []
         if(this.state.contracts){
           for(let c in this.state.contracts){
-            contractDisplay.push(
-              <div key={"contract"+c} style={{margin:5,padding:5}}>
-                {c} ({this.state.contracts[c]._address})
-              </div>
-            )
+            let address = this.state.contracts[c]._address
+            if (address)
+            {
+              contractDisplay.push(
+                <div key={"contract"+c} style={{margin:5,padding:5}}>
+                  {c} ({address})
+                </div>
+              )
+              let abi = this.state.contracts[c]._abi
+              console.log(abi)
+              for (var i = 0; i < abi.length; i++)
+              {
+                let f = abi[i]
+                contractDisplay.push(this.createUIfromABI(f))
+              }
+            }
           }
         }else {
           contractDisplay = "Loading..."
