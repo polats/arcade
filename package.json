@@ -4,6 +4,7 @@
   "description": "Software stack for creating arcade and tournament sessions on-chain",
   "main": "./lib/index.js",
   "scripts": {
+    "travis:test": "npm run package:prepublish && npm run react:build && npm run truffle:test",
     "clean": "rimraf lib",
     "test": "npm run lint && npm run cover",
     "test:prod": "cross-env BABEL_ENV=production npm run test",
