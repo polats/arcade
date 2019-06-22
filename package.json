@@ -16,7 +16,7 @@
     "package:prepublish": "npm run clean && npm run lint && npm run test && npm run package:build",
     "client": "cd client && npm start",
     "server": "nodemon server.js",
-    "react:build": "cd client && npm run build",
+    "react:build": "cd client && npm install && npm run build",
     "dev:local": "npm run truffle:compile && npm run contracts:copy && concurrently --kill-others-on-fail \"npm run client\" \"npm run server\"",
     "heroku-postbuild": "cd client && npm install",
     "start": "node server.js",
