@@ -10,13 +10,27 @@ export default class MultiParamManager extends Component {
     this.clickCallBack = clickCallBack
     this.inputs = inputs
     this.title = title
+
+    this.inputValue = ""
+  }
+
+  changeInput = (e) => {
+    this.inputValue = e.target.value
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    this.clickCallBack(this.funABI.inputs, this.inputValue)
   }
 
   render() {
     return <div key={"abi"+this.funABI.name} style={{margin:5,padding:5}}>
-              <button>{this.funABI.name}</button>
-              <input title={this.inputs} placeholder={this.inputs}>
-              </input>
+              <form onSubmit={this.onSubmit}>
+                <button type="submit">{this.funABI.name}</button>
+                <input title={this.inputs} placeholder={this.inputs} onChange={this.changeInput}>
+                </input>
+              </form>
             </div>
   }
 }
