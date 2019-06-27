@@ -8036,9 +8036,16 @@
     "name": "solc",
     "version": "0.5.2+commit.1df8f40c.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
+      "transactionHash": "0x9d48d67ff58ddacaf17cf9af4610d695812a9d576e8f04b646872d4e9d79a781"
+    }
+  },
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-06-22T03:29:57.398Z",
+  "updatedAt": "2019-06-22T08:31:30.289Z",
   "devdoc": {
     "details": "Mintable form of ERC1155\r Shows how easy it is to mint new items\r",
     "methods": {

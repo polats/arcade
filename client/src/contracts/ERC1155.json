@@ -12764,7 +12764,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-06-22T08:09:30.551Z",
+  "updatedAt": "2019-06-27T04:25:53.799Z",
   "devdoc": {
     "methods": {
       "balanceOf(address,uint256)": {

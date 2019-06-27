@@ -955,7 +955,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-06-22T08:09:30.622Z",
+  "updatedAt": "2019-06-27T04:25:53.845Z",
   "devdoc": {
     "methods": {
       "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": {
