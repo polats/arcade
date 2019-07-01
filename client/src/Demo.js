@@ -45,8 +45,9 @@ class Demo extends Arcade {
 
       connectedDisplay.push(
         <ArcadeContractLoader
-          config={{DEBUG:true, hide:false}}
+          config={{DEBUG:false, hide:false}}
           web3={web3}
+          account={account}
           contracts={require(`${__dirname}/contracts`)}
         />
       )

@@ -2,15 +2,22 @@ import * as React from 'react';
 import deepmerge from 'deepmerge';
 import remixLib from 'remix-lib';
 import * as $ from 'jquery';
+import async from 'async';
 import MultiParamManager from './multiParamManager';
+import * as ethJSUtil from 'ethereumjs-util';
 
 let defaultConfig = {
-  DEBUG: true,
+  DEBUG: false,
   hide: true
 }
 
 var txHelper = remixLib.execution.txHelper
 var executionContext = remixLib.execution.executionContext
+var typeConversion = remixLib.execution.typeConversion
+var txExecution = remixLib.execution.txExecution
+var txFormat = remixLib.execution.txFormat
+var TxRunner = remixLib.execution.txRunner
+var EventManager = remixLib.EventManager
 
 export class ArcadeContractLoader extends React.Component {
 
@@ -25,6 +32,31 @@ export class ArcadeContractLoader extends React.Component {
         config: config,
         contracts: {}
       }
+
+      this.transactionContextAPI = {
+        getAddress: (cb) => {
+          cb(null, this.props.account)
+        },
+        getValue: (cb) => {
+          cb(null, 0)
+        },
+        getGasLimit: (cb) => {
+          cb(null, executionContext.currentblockGasLimit())
+        }
+      }
+
+      this.event = new EventManager()
+
+      this._txRunnerAPI = {
+        // config: this._deps.config,
+        detectNetwork: (cb) => {
+          executionContext.detectNetwork(cb)
+        },
+        personalMode: () => {
+          return executionContext.getProvider() === 'web3' ? this._deps.config.get('settings/personal-mode') : false
+        }
+      }
+      this.txRunner = new TxRunner({}, this._txRunnerAPI)
     }
 
     getAddressFromJson(contractJson, networkId)
@@ -82,7 +114,7 @@ export class ArcadeContractLoader extends React.Component {
     renderInstanceFromABI(contractABI, address, contractName) {
       let ret = []
 
-      console.log(contractABI);
+      if (this.state.config.DEBUG) console.log(contractABI);
 
       $.each(contractABI, (i, funABI) => {
         if (funABI.type !== 'function') {
@@ -103,6 +135,7 @@ export class ArcadeContractLoader extends React.Component {
     }
 
     getCallButton(args) {
+      var self = this
       var lookupOnly = args.funABI.constant
 
       function getInputs (funABI) {
@@ -113,16 +146,15 @@ export class ArcadeContractLoader extends React.Component {
       }
 
       function clickButton (valArr, inputsValues) {
-        console.log(valArr, inputsValues);
-        // var logMsg
-        // if (!args.funABI.constant) {
-        //   logMsg = `transact to ${args.contractName}.${(args.funABI.name) ? args.funABI.name : '(fallback)'}`
-        // } else {
-        //   logMsg = `call to ${args.contractName}.${(args.funABI.name) ? args.funABI.name : '(fallback)'}`
-        // }
-        //
-        // var value = inputsValues
-        //
+        var logMsg
+        if (!args.funABI.constant) {
+          logMsg = `transact to ${args.contractName}.${(args.funABI.name) ? args.funABI.name : '(fallback)'}`
+        } else {
+          logMsg = `call to ${args.contractName}.${(args.funABI.name) ? args.funABI.name : '(fallback)'}`
+        }
+
+        var value = inputsValues
+
         // var confirmationCb = (network, tx, gasEstimation, continueTxExecution, cancelCb) => {
         //   if (network.name !== 'Main') {
         //     return continueTxExecution(null)
@@ -207,43 +239,46 @@ export class ArcadeContractLoader extends React.Component {
         // var promptCb = (okCb, cancelCb) => {
         //   modalCustom.promptPassphrase('Passphrase requested', 'Personal mode is enabled. Please provide passphrase of account', '', okCb, cancelCb)
         // }
-        //
-        // // contractsDetails is used to resolve libraries
-        // txFormat.buildData(args.contractName, args.contractAbi, {}, false, args.funABI, args.funABI.type !== 'fallback' ? value : '', (error, data) => {
-        //   if (!error) {
-        //     if (!args.funABI.constant) {
-        //       self.registry.get('logCallback').api(`${logMsg} pending ... `)
-        //     } else {
-        //       self.registry.get('logCallback').api(`${logMsg}`)
-        //     }
-        //     if (args.funABI.type === 'fallback') data.dataHex = value
-        //     self.udapp.callFunction(args.address, data, args.funABI, confirmationCb, continueCb, promptCb, (error, txResult) => {
-        //       if (!error) {
-        //         var isVM = executionContext.isVM()
-        //         if (isVM) {
-        //           var vmError = txExecution.checkVMError(txResult)
-        //           if (vmError.error) {
-        //             self.registry.get('logCallback').api(`${logMsg} errored: ${vmError.message} `)
-        //             return
-        //           }
-        //         }
-        //         if (lookupOnly) {
-        //           var decoded = decodeResponseToTreeView(executionContext.isVM() ? txResult.result.vm.return : ethJSUtil.toBuffer(txResult.result), args.funABI)
-        //           outputCb(decoded)
-        //         }
-        //       } else {
-        //         self.registry.get('logCallback').api(`${logMsg} errored: ${error} `)
-        //       }
-        //     })
-        //   } else {
-        //     self.registry.get('logCallback').api(`${logMsg} errored: ${error} `)
-        //   }
-        // }, (msg) => {
-        //   self.registry.get('logCallback').api(msg)
-        // }, (data, runTxCallback) => {
-        //   // called for libraries deployment
-        //   self.udapp.runTx(data, confirmationCb, runTxCallback)
-        // })
+
+        // contractsDetails is used to resolve libraries
+        txFormat.buildData(args.contractName, args.contractAbi, {}, false, args.funABI, args.funABI.type !== 'fallback' ? value : '', (error, data) => {
+          if (!error) {
+            if (!args.funABI.constant) {
+              console.log(logMsg + "  pending ... ");
+            } else {
+              console.log(logMsg);
+            }
+
+            if (args.funABI.type === 'fallback') data.dataHex = value
+            self.callFunction(args.address, data, args.funABI, (error, txResult) => {
+              if (!error && self.state.config.DEBUG) {
+                var isVM = executionContext.isVM()
+                if (isVM) {
+                  var vmError = txExecution.checkVMError(txResult)
+                  if (vmError.error) {
+                    console.log(logMsg + "  errored: " + vmError.message);
+                    return
+                  }
+                }
+                if (lookupOnly) {
+                  console.log(executionContext.isVM() ? txResult.result.vm.return : ethJSUtil.toBuffer(txResult.result), args.funABI)
+                }
+              } else {
+                console.log(logMsg + "  errored: " + error);
+              }
+            })
+          } else {
+            console.log(logMsg + "  errored: " + error);
+          }
+
+        }, (msg) => {
+          console.log(msg);
+
+        }, (data, runTxCallback) => {
+          console.log(data);
+          // called for libraries deployment
+          self.runTx(data, runTxCallback)
+        })
       }
 
       var multiParamManager = new MultiParamManager(lookupOnly, args.funABI, (valArray, inputsValues, domEl) => {
@@ -251,6 +286,84 @@ export class ArcadeContractLoader extends React.Component {
       }, getInputs(args.funABI))
 
       return multiParamManager.render()
+    }
+
+    callFunction (to, data, funAbi, callback) {
+      this.runTx({to: to, data: data, useCall: funAbi.constant}, (error, txResult) => {
+        callback(error, txResult)
+      })
+    }
+
+    runTx (args, cb) {
+      const self = this
+      async.waterfall([
+        function getGasLimit (next) {
+          if (self.transactionContextAPI.getGasLimit) {
+            return self.transactionContextAPI.getGasLimit(next)
+          }
+          next(null, 3000000)
+        },
+        function queryValue (gasLimit, next) {
+          if (args.value) {
+            return next(null, args.value, gasLimit)
+          }
+          if (args.useCall || !self.transactionContextAPI.getValue) {
+            return next(null, 0, gasLimit)
+          }
+          self.transactionContextAPI.getValue(function (err, value) {
+            next(err, value, gasLimit)
+          })
+        },
+        function getAccount (value, gasLimit, next) {
+          if (args.from) {
+            return next(null, args.from, value, gasLimit)
+          }
+          if (self.transactionContextAPI.getAddress) {
+            return self.transactionContextAPI.getAddress(function (err, address) {
+              next(err, address, value, gasLimit)
+            })
+          }
+          self.getAccounts(function (err, accounts) {
+            let address = accounts[0]
+
+            if (err) return next(err)
+            if (!address) return next('No accounts available')
+            if (executionContext.isVM() && !self.accounts[address]) {
+              return next('Invalid account selected')
+            }
+            next(null, address, value, gasLimit)
+          })
+        },
+        function runTransaction (fromAddress, value, gasLimit, next) {
+          var tx = { to: args.to, data: args.data.dataHex, useCall: args.useCall, from: fromAddress, value: value, gasLimit: gasLimit, timestamp: args.data.timestamp }
+          var payLoad = { funAbi: args.data.funAbi, funArgs: args.data.funArgs, contractBytecode: args.data.contractBytecode, contractName: args.data.contractName, contractABI: args.data.contractABI, linkReferences: args.data.linkReferences }
+          var timestamp = Date.now()
+          if (tx.timestamp) {
+            timestamp = tx.timestamp
+          }
+
+          // self.event.trigger('initiatingTransaction', [timestamp, tx, payLoad])
+          self.txRunner.rawRun(tx,
+            (network, tx, gasEstimation, continueTxExecution, cancelCb) => { continueTxExecution() },
+            (error, continueTxExecution, cancelCb) => { if (error) { cb(error) } else { continueTxExecution() } },
+            (okCb, cancelCb) => { okCb() },
+            function (error, result) {
+              console.log(result)
+
+              let eventName = (tx.useCall ? 'callExecuted' : 'transactionExecuted')
+              self.event.trigger(eventName, [error, tx.from, tx.to, tx.data, tx.useCall, result, timestamp, payLoad])
+
+              if (error && (typeof (error) !== 'string')) {
+                if (error.message) error = error.message
+                else {
+                  try { error = 'error: ' + JSON.stringify(error) } catch (e) {}
+                }
+              }
+              next(error, result)
+            }
+          )
+        }
+      ], cb)
     }
 
     render(){
