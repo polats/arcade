@@ -18,6 +18,10 @@ var txExecution = remixLib.execution.txExecution
 var txFormat = remixLib.execution.txFormat
 var TxRunner = remixLib.execution.txRunner
 var EventManager = remixLib.EventManager
+var Storage = remixLib.Storage
+
+var Config = require('./config')
+var registry = require('./global/registry')
 
 export class ArcadeContractLoader extends React.Component {
 
@@ -47,8 +51,22 @@ export class ArcadeContractLoader extends React.Component {
 
       this.event = new EventManager()
 
+      var self = this
+      self._components = {}
+      registry.put({api: self, name: 'app'})
+
+      var configStorage = new Storage('config-v0.8:')
+      registry.put({api: configStorage, name: 'configStorage'})
+
+      self._components.config = new Config(configStorage)
+      registry.put({api: self._components.config, name: 'config'})
+
+      this._deps = {
+        config: registry.get('config').api
+      }
+
       this._txRunnerAPI = {
-        // config: this._deps.config,
+        config: this._deps.config,
         detectNetwork: (cb) => {
           executionContext.detectNetwork(cb)
         },
@@ -56,7 +74,9 @@ export class ArcadeContractLoader extends React.Component {
           return executionContext.getProvider() === 'web3' ? this._deps.config.get('settings/personal-mode') : false
         }
       }
+
       this.txRunner = new TxRunner({}, this._txRunnerAPI)
+
     }
 
     getAddressFromJson(contractJson, networkId)
