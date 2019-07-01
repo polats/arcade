@@ -8,11 +8,11 @@ export default class Arcade extends Component {
     }
 
     componentDidUpdate() {
-      console.log(this.state);
+      // console.log(this.state);
     }
 
     async componentDidMount() {
-      console.log(this.constructor.name + " componentDidMount");
+      // console.log(this.constructor.name + " componentDidMount");
     }
 
     render() {

@@ -59,7 +59,7 @@ class Demo extends Arcade {
         <Metamask
           config={{requiredNetwork:['Private', 'Unknown','Rinkeby', 'Ropsten', 'Mainnet']}}
           onUpdate={(state)=>{
-           console.log("metamask state update:",state)
+           // console.log("metamask state update:",state)
            if(state.web3Provider) {
              state.web3 = new Web3(state.web3Provider)
              this.setState(state)
